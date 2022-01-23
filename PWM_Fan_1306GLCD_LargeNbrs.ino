@@ -201,9 +201,6 @@ void DISPLAY_Encoder_Setting(uint8_t target) {
         }
         else {                                  // handle unexpected issues
             target = 0;                         // turn off fan
-            display.display();
-            DISPLAY_Error_();                   // reset the Arduino
-
 #ifdef DEBUG
             Serial.println("Error occurred in ");
             Serial.println(__FILE__);
@@ -212,6 +209,7 @@ void DISPLAY_Encoder_Setting(uint8_t target) {
             Serial.end();                               // keep from overflowing your PC...
             resetFunc();                                // reset the Arduino
 #endif // DEBUG
+            DISPLAY_Error_();                   // reset the Arduino
         }
         // blank out old, and draw new value
         display.setFont(&FreeSansBoldOblique24pt7b);
