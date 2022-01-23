@@ -155,7 +155,7 @@ uint8_t ENCODER_Speed_Set(int16_t delta) {
     if ( (delta < global.ENCODER_MIN_VAL) && (encValue < (abs(delta)) ) ) {
         delta = 0;                              // prevent us from going below zero, or abov MAX
     }
-    if ( (delta > global.ENCODER_MIN_VAL) && (encValue > ((global.ENCODER_MAX_VAL - 1) + delta) ) ) {
+    if ( (delta > global.ENCODER_MIN_VAL) && (encValue > (global.ENCODER_MAX_VAL - delta) ) ) {
         delta = 0;
     }
 
@@ -191,13 +191,13 @@ void DISPLAY_Encoder_Setting(uint8_t target) {
         else if ((target >= 0) && (target < 10)) {
             display.setCursor(90, 61);
         }
-        else if (target <= 0) {                 // these two checks are redundant,
-            target = 0;                         // but better safe than sorry...
-            display.setCursor(90, 61);
-        }
         else if (target >= 100) {
             target = 100;
             display.setCursor(39, 61);
+        }
+        else if (target <= 0) {                 // these two checks are redundant,
+            target = 0;                         // but better safe than sorry...
+            display.setCursor(90, 61);
         }
         else {                                  // handle unexpected issues
             target = 0;                         // turn off fan
