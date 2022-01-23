@@ -54,7 +54,7 @@ struct GLOBALS {
     uint16_t        Current_Text_Color      = WHITE;    // My SSD1306 only accepts Black & White
     const int16_t   ENCODER_MAX_VAL         = 400;      // 100 percent, times 4 encoder increments per knob click
     const int16_t   ENCODER_MIN_VAL         = 0;
-    const int16_t   TARGET_MAX_VAL          = 400;      // 100 percent
+    const int16_t   TARGET_MAX_VAL          = 100;      // 100 percent
     const int16_t   TARGET_MIN_VAL          = 0;
     const uint16_t  PWM_FREQ_HZ             = 25000;    //Change this value to adjust the PWM frequency in Hz
     const uint16_t  TCNT1_TOP               = ((16000000L) / (2 * PWM_FREQ_HZ)); // crystal freq - PWM timer setup
@@ -77,7 +77,7 @@ void setup(void)
 {
 #ifdef DEBUG
     Serial.begin(115200);
-    Serial.println("Fan Controller Library Demo");
+    Serial.println("PWM Fan Controller with RPM Readout");
 #endif // DEBUG
 
     pinMode(pin.ENCODER_A, INPUT_PULLUP);
@@ -149,7 +149,7 @@ uint8_t ENCODER_Speed_Set(int16_t delta) {
 
     /* Library will return both positive and negative numbers, of a value which depends
     *  on the rate (speed) that you turn the encoder knob. Therefor, we should test
-    *  the value of 'delta' and compare that to 'encValue', instead of just 
+    *  the value of 'delta' and compare that to 'encValue', instead of just to
     *  the 'encValue' MIN and MAX limits.
     */
     if ( (delta < global.ENCODER_MIN_VAL) && (encValue < (abs(delta)) ) ) {
@@ -208,8 +208,8 @@ void DISPLAY_Encoder_Setting(uint8_t target) {
             Serial.println(__LINE__);
             Serial.end();                       // keep from overflowing your PC...
 #endif // DEBUG
+            DISPLAY_Error_();                   // let user know, and
             resetFunc();                        // reset the Arduino
-            DISPLAY_Error_();                   // reset the Arduino
         }
         // blank out old, and draw new value
         display.setFont(&FreeSansBoldOblique24pt7b);
@@ -260,7 +260,6 @@ void DISPLAY_Error_() {
 
     delay(2000);
 
-    resetFunc();                                // reset the Arduino
 }   // END DISPLAY_Error_
 
 /////////////////////////////////////////////////////////////////////////////
