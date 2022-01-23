@@ -1,11 +1,10 @@
-/*
-* Name:       PWM_PC_Fan_25KHz_Encoder_GLCD.ino
+/*///////////////////////////////////////////////////////////////////////////
+* 
+* Name:     PWM_PC_Fan_25KHz_Encoder_GLCD.ino
 * Created:	1/18/2022 7:41:38 PM
 * Author:	Brad Hedges
-* 
-* Visual Micro is in vMicro>General>Tutorial Mode
 *
-*//////////////////////////////////////////////////////////////////////////////
+*////////////////////////////////////////////////////////////////////////////
 // Include the libraries
 
 #include <Adafruit_GFX.h>                       // Core graphics library
@@ -142,8 +141,8 @@ void ENCODER_Switch(bool pb) {
 uint8_t ENCODER_Speed_Set(int16_t delta) {
     const int16_t   ENCODER_MAX_VAL = 400;      // 100 percent, times 4 encoder increments per knob click
     const int16_t   ENCODER_MIN_VAL = 0;
-    const int16_t   TARGET_MAX_VAL = 100;      // 100 percent
-    const int16_t   TARGET_MIN_VAL = 0;
+    const int16_t   TARGET_MAX_VAL  = 100;      // 100 percent
+    const int16_t   TARGET_MIN_VAL  = 0;
     static int16_t      encValue    = 0;        // intermediate variable for calculations
     uint8_t             target      = 0;        // sent to PWM and display
 
@@ -181,7 +180,7 @@ uint8_t ENCODER_Speed_Set(int16_t delta) {
 void DISPLAY_Encoder_Setting(uint8_t target) {
     static uint8_t oldTarget = 0;
 
-    if (oldTarget == target) {                  // most of the time, it won't change, 
+    if (oldTarget == target) {                  // most of the time, the setting won't change, 
         ;                                       // so skip the display redraw
     }
     else {                                      // only redraw screen if it needs updating
@@ -212,7 +211,7 @@ void DISPLAY_Encoder_Setting(uint8_t target) {
             resetFunc();                        // reset the Arduino
         }
         // blank out old, and draw new value
-        display.setFont(&FreeSansBoldOblique24pt7b);
+        display.setFont(&FreeSansBoldOblique24pt7b);    // TODO: break out drawing into functions
         display.fillRect(33, 20, 95, 44, BLACK);
         display.print(target);
         display.display();
@@ -332,7 +331,7 @@ void PWM_Timer_Setup(void) {                            // this gives us the 25 
 
 /////////////////////////////////////////////////////////////////////////////
 
-void PWM_Set_Duty(byte duty) {                          // 25 KHz routine
+void PWM_Set_Duty(uint8_t duty) {                          // 25 KHz routine
 
     OCR1A = (word)(duty * global.TCNT1_TOP) / 100;      // write to chip register
 
