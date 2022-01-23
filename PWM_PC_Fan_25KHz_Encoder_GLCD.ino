@@ -24,7 +24,7 @@ void    DISPLAY_Setup(void);
 void    DISPLAY_Write_Numbers(void);
 void    DISPLAY_Redraw(void);                   // screen refresh
 void    DISPLAY_Error_(void);
-uint8_t ENCODER_Speed_Set(int16_t);            // limits and calculations
+uint8_t ENCODER_Speed_Set(int16_t);             // limits and calculations
 void    ENCODER_Switch(bool);
 void    PWM_Timer_Setup(void);
 void    PWM_Set_Duty(byte);
