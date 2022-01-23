@@ -206,9 +206,9 @@ void DISPLAY_Encoder_Setting(uint8_t target) {
             Serial.println(__FILE__);
             Serial.println(__FUNCTION__);
             Serial.println(__LINE__);
-            Serial.end();                               // keep from overflowing your PC...
-            resetFunc();                                // reset the Arduino
+            Serial.end();                       // keep from overflowing your PC...
 #endif // DEBUG
+            resetFunc();                        // reset the Arduino
             DISPLAY_Error_();                   // reset the Arduino
         }
         // blank out old, and draw new value
