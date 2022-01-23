@@ -11,8 +11,7 @@
 #include <Adafruit_GFX.h>                       // Core graphics library
 #include <Adafruit_SSD1306.h>
 #include <Fonts/FreeSansBoldOblique9pt7b.h>
-//#include <Fonts/FreeSansBoldOblique24pt7b.h>
-#include <Fonts/FreeSansBoldOblique24ptNbrsOnly.h>      // edited version saves ~5 KB of space
+#include <Fonts/FreeSansBoldOblique24pt7b.h>
 #include <FanController.h>
 #include <Encoder.h>
 
