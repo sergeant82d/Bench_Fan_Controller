@@ -15,11 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="PWM_PC_Fan_25KHz_Encoder_GLCD.ino" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="__vm\.PWM_PC_Fan_25KHz_Encoder_GLCD.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="__vm\.Bench_Fan_Controller.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Z:\Downloads\Embedded\Bench Fan Controller\Bench_Fan_Controller\FSBO24_Nbrs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="PWM_PC_Fan_25KHz_Encoder_GLCD.ino">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Z:\Downloads\Embedded\Bench Fan Controller\Bench_Fan_Controller\README (2).md">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Z:\Downloads\Embedded\Bench Fan Controller\Bench_Fan_Controller\README.md">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

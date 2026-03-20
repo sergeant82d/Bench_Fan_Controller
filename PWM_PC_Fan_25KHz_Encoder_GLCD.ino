@@ -8,11 +8,11 @@
 // Include the libraries
 
 #include <Adafruit_GFX.h>                       // Core graphics library
-#include <Adafruit_SSD1306.h>
-#include <Fonts/FreeSansBoldOblique9pt7b.h>
+#include <Adafruit_SSD1306.h>                   // Display library for SSD1306 OLEDs
+#include <Fonts/FreeSansBoldOblique9pt7b.h>     // Fonts for RPM readout
 #include <Fonts/FreeSansBoldOblique24pt7b.h>
-#include <FanController.h>
-#include <Encoder.h>
+#include <FanController.h>                      // Custom library for reading fan speed from PWM fans - see FanController.h and .cpp files
+#include <Encoder_LL.h>                         // Custom library for reading rotary encoder input - see Encoder_LL.h and .cpp files
 
 /////////////////////////////////////////////////////////////////////////////
 // Function Prototypes
@@ -27,7 +27,7 @@ uint8_t ENCODER_Speed_Set(int16_t);             // limits and calculations
 void    ENCODER_Switch(bool);
 void    PWM_Timer_Setup(void);
 void    PWM_Set_Duty(byte);
-void    (*resetFunc) (void) = 0;                // software reset in error handling function
+void    SOFT_Reset(void);                       // software reset function
 
 
 //#define DEBUG                                 // un-comment to print to serial port
@@ -50,11 +50,12 @@ struct MYPINS {
 
 struct GLOBALS {
     const uint16_t  DISPLAY_ADDRESS         = 0x3c;     // I2C address for display
-    uint16_t        Current_Text_Color      = WHITE;    // My SSD1306 only accepts Black & White
+//    uint16_t        Current_Text_Color      = WHITE;    // My SSD1306 only accepts Black & White
     const uint16_t  PWM_FREQ_HZ             = 25000;    //Change this value to adjust the PWM frequency in Hz
     const uint16_t  TCNT1_TOP               = ((16000000L) / (2 * PWM_FREQ_HZ)); // crystal freq - PWM timer setup
     bool            FAN_Power_State         = false;
     const uint16_t  FANspeed_ReadThreshold  = 1000;     // this is number of millis() elapsed - see library header
+    const uint16_t  BUTTON_DEBOUNCE_MS      = 20;       // debounce threshold in milliseconds
 } global;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -118,29 +119,32 @@ void loop(void) {
 */
 void ENCODER_Switch(bool pb) {
     static bool oldPowerState = 0;
-    global.FAN_Power_State = pb;
+    static unsigned long lastDebounceTime = 0;
+    unsigned long currentTime = millis();
 
-    if (oldPowerState == global.FAN_Power_State) {
-        ;
-    }
-    else {
-        if (global.FAN_Power_State == false) {
-            digitalWrite(pin.TEMPORARY_TEST_LED, LOW);
-        }
-        if (global.FAN_Power_State == true) {
-            digitalWrite(pin.TEMPORARY_TEST_LED, HIGH);
-            resetFunc();                        // reset the Arduino - just for testing!
-        }
+    if (pb != oldPowerState) {
+        if ((currentTime - lastDebounceTime) >= global.BUTTON_DEBOUNCE_MS) {
+            oldPowerState = pb;
+            lastDebounceTime = currentTime;
+            global.FAN_Power_State = pb;
 
+            if (global.FAN_Power_State == false) {
+                digitalWrite(pin.TEMPORARY_TEST_LED, LOW);
+            }
+            if (global.FAN_Power_State == true) {
+                digitalWrite(pin.TEMPORARY_TEST_LED, HIGH);
+                SOFT_Reset();                   // reset the Arduino - just for testing!
+            }
+        }
     }
-    oldPowerState = global.FAN_Power_State;
 }   // END ENCODER_Switch
 
 /////////////////////////////////////////////////////////////////////////////
+// NOTE: DOES NOT USE STANDARD ARDUINO ENCODER LIBRARY, BUT A CUSTOM ONE - SEE Encoder_LL.h
 
 uint8_t ENCODER_Speed_Set(int16_t delta) {
     const int16_t   ENCODER_MAX_VAL = 400;      // 100 percent, times 4 encoder increments per knob click
-    const int16_t   ENCODER_MIN_VAL = 0;
+//    const int16_t   ENCODER_MIN_VAL = 0;
     const int16_t   TARGET_MAX_VAL  = 100;      // 100 percent
     const int16_t   TARGET_MIN_VAL  = 0;
     static int16_t      encValue    = 0;        // intermediate variable for calculations
@@ -151,10 +155,10 @@ uint8_t ENCODER_Speed_Set(int16_t delta) {
     *  the value of 'delta' and compare that to 'encValue', instead of just to
     *  the 'encValue' MIN and MAX limits.
     */
-    if ( (delta < ENCODER_MIN_VAL) && (encValue < (abs(delta)) ) ) {
+    if ( (delta < 0) && (encValue < (abs(delta)) ) ) {
         delta = 0;                              // prevent us from going below zero, or abov MAX
     }
-    if ( (delta > ENCODER_MIN_VAL) && (encValue > (ENCODER_MAX_VAL - delta) ) ) {
+    if ( (delta > 0) && (encValue > (ENCODER_MAX_VAL - delta) ) ) {
         delta = 0;
     }
 
@@ -180,19 +184,17 @@ uint8_t ENCODER_Speed_Set(int16_t delta) {
 void DISPLAY_Encoder_Setting(uint8_t target) {
     static uint8_t oldTarget = 0;
 
-    if (oldTarget == target) {                  // most of the time, the setting won't change, 
-        ;                                       // so skip the display redraw
-    }
-    else {                                      // only redraw screen if it needs updating
+    if (oldTarget != target) {
+        // only redraw if changed
         if ((target > 9) && (target < 100)) {   // set cursor location to right-align the numbers
-            display.setCursor(65, 61);          // always start with the most likely outcome
+            display.setCursor(65, 61);          // always start with the most likely outcome (two digits)
         }
         else if ((target >= 0) && (target < 10)) {
-            display.setCursor(90, 61);
+            display.setCursor(90, 61);          // always start with the most likely outcome (single digits)
         }
         else if (target >= 100) {
             target = 100;
-            display.setCursor(39, 61);
+            display.setCursor(39, 61);          // always start with the most likely outcome (three digits)
         }
         else if (target <= 0) {                 // these two checks are redundant,
             target = 0;                         // but better safe than sorry...
@@ -208,7 +210,7 @@ void DISPLAY_Encoder_Setting(uint8_t target) {
             Serial.end();                       // keep from overflowing your PC...
 #endif // DEBUG
             DISPLAY_Error_();                   // let user know, and
-            resetFunc();                        // reset the Arduino
+            SOFT_Reset();                       // reset the Arduino
         }
         // blank out old, and draw new value
         display.setFont(&FreeSansBoldOblique24pt7b);    // TODO: break out drawing into functions
@@ -225,10 +227,9 @@ void DISPLAY_Encoder_Setting(uint8_t target) {
 void DISPLAY_Fan_RPM(uint16_t rpms) {
     static uint16_t oldRPMs = 0;
 
-    if (oldRPMs == rpms) {                      // most of the time, it won't change, 
-        ;                                       // so skip the display redraw
-    }
-    else {
+    if (oldRPMs != rpms) {
+    
+        // actual logic
         display.fillRect(64, 0, 64, 15, BLACK); // blank out the old numbers before writing new
         display.setFont(&FreeSansBoldOblique9pt7b);
         display.setCursor(70, 14);
@@ -282,7 +283,7 @@ void DISPLAY_Redraw() {
     display.setFont(&FreeSansBoldOblique24pt7b);
     display.setCursor(39, 61);
     display.print(0);                           // speed setting is blank on startup without this...
-    display.setCursor(65, 61);                  // font spacing test - helps establish positions
+    display.setCursor(65, 61);
     display.print(0);
     display.setCursor(90, 61);
     display.print(0);
@@ -311,7 +312,21 @@ void DISPLAY_Write_Numbers() {
 /////////////////////////////////////////////////////////////////////////////
 
 void DISPLAY_Setup() {
-    display.begin(SSD1306_SWITCHCAPVCC, global.DISPLAY_ADDRESS);
+    if (!display.begin(SSD1306_SWITCHCAPVCC, global.DISPLAY_ADDRESS)) {
+        // Display initialization failed - halt and signal error
+        digitalWrite(pin.TEMPORARY_TEST_LED, HIGH);
+#ifdef DEBUG
+        Serial.println("ERROR: Display initialization failed at address 0x");
+        Serial.println(global.DISPLAY_ADDRESS, HEX);
+#endif
+        // Enter infinite loop with LED on to indicate failure
+        while (1) {
+            delay(500);
+            digitalWrite(pin.TEMPORARY_TEST_LED, LOW);
+            delay(500);
+            digitalWrite(pin.TEMPORARY_TEST_LED, HIGH);
+        }
+    }
     display.clearDisplay();
     display.setTextColor(WHITE);
     display.setRotation(0);
@@ -333,12 +348,18 @@ void PWM_Timer_Setup(void) {                            // this gives us the 25 
 
 void PWM_Set_Duty(uint8_t duty) {                          // 25 KHz routine
 
-    OCR1A = (word)(duty * global.TCNT1_TOP) / 100;      // write to chip register
+    OCR1A = (uint16_t)((uint32_t)duty * global.TCNT1_TOP) / 100;      // write to chip register
 
 #ifdef DEBUG
     Serial.println(duty);
 #endif
 }   // END PWM_Set_Duty
+
+/////////////////////////////////////////////////////////////////////////////
+
+void SOFT_Reset(void) {
+    asm volatile ("jmp 0");                    // Jump to address 0 (reset vector) for Arduino
+}   // END SOFT_Reset
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
