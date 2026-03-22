@@ -14,7 +14,7 @@ Tyler Peppy - 25 KHz PWM direct from the 328's registers
 
 https://github.com/T-622/25KHz-Arduino-Fan-PWM-Control
 
-/// Old Location. Thank you xxx for the update! ///
+/// Old Location. Thank you ufanders for the updated link! ///
 https://create.arduino.cc/projecthub/tylerpeppy/25-khz-4-pin-pwm-fan-control-with-arduino-uno-3005a1
 
 Giorgio Aresu - Fan Controller to monitor the fan speed
