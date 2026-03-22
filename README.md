@@ -1,5 +1,5 @@
 # Bench_Fan_Controller
-Using an SSD1306 GLCD and a rotary encoder to monitor and control the speed of a PWM (4-pin) PC fan. Initial commit works fully on Arduino Uno. Future mods (should) include different display options, and a menu process to save and recall pre-set RPM values, and save them to EEPROM.
+Monitor and control the speed of a PWM (4-pin) PC fan using an SSD1306 GLCD and a rotary encoder. Initial commit works fully on Arduino Uno. Future mods (should) include different display options, and a menu process to save and recall pre-set RPM values, and save them to EEPROM.
 
 
 
