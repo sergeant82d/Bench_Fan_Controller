@@ -14,6 +14,7 @@ https://github.com/John-Lluch/Encoder
 
 Tyler Peppy - 25 KHz PWM direct from the 328's registers
 https://github.com/T-622/25KHz-Arduino-Fan-PWM-Control
+
 ////////
 Thank you ufanders for the updated link!
 ////////
