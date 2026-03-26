@@ -7,15 +7,17 @@ I used code and libraries from four external sources:
 
 Adafruit - GFX & SSD1306 LCD driver, & fonts libraries. I also used their font converter web app to reduce the character set of the 24pt FreeSansBoldOblique24Pt7b.h down to only the numbers. This reduced the file size from ~10KB to only ~1KB. Totally worth the effort.
 
+
 John Lluch - Encoder library
 https://github.com/John-Lluch/Encoder
 
-Tyler Peppy - 25 KHz PWM direct from the 328's registers
 
+Tyler Peppy - 25 KHz PWM direct from the 328's registers
 https://github.com/T-622/25KHz-Arduino-Fan-PWM-Control
-/////////// 
+////////
 Thank you ufanders for the updated link!
-///////////
+////////
+
 
 Giorgio Aresu - Fan Controller to monitor the fan speed
 https://github.com/GiorgioAresu/FanController
