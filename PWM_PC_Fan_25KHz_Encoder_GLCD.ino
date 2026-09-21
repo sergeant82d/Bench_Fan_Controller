@@ -155,14 +155,7 @@ uint8_t ENCODER_Speed_Set(int16_t delta) {
     *  the value of 'delta' and compare that to 'encValue', instead of just to
     *  the 'encValue' MIN and MAX limits.
     */
-    if ( (delta < 0) && (encValue < (abs(delta)) ) ) {
-        delta = 0;                              // prevent us from going below zero, or abov MAX
-    }
-    if ( (delta > 0) && (encValue > (ENCODER_MAX_VAL - delta) ) ) {
-        delta = 0;
-    }
-
-    encValue += delta;                          // adjust total encoder value
+    encValue = constrain(encValue + delta, 0, ENCODER_MAX_VAL);   // saturate at 0 and MAX so fast turns still reach the limits
 
     target = (encValue / 4); // encoder has four increments per knob tick - remove them here
 
@@ -339,7 +332,8 @@ void PWM_Timer_Setup(void) {                            // this gives us the 25 
     TCCR1A = 0;                                         // write to chip register
     TCCR1B = 0;
     TCNT1 = 0;
-    TCCR1A |= (1 << COM1A1) | (1 << WGM11);
+    OCR1A = 0;                                          // soft reset doesn't clear this - start with fan off to match display
+    TCCR1A |=(1 << COM1A1) | (1 << WGM11);
     TCCR1B |= (1 << WGM13) | (1 << CS10);
     ICR1 = global.TCNT1_TOP;
 }   // END PWM_Timer_Setup
